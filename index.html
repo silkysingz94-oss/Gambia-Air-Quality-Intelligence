@@ -1,0 +1,2002 @@
+# GBoS GEOAI | GAMBIA AIR QUALITY INTELLIGENCE
+## Full HTML Web Mapping & Air Quality Analytics Dashboard
+
+Save as `Gambia_Air_Quality_Intelligence.html` and open in Chrome or Edge.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GBoS GEOAI | Gambia Air Quality Intelligence</title>
+
+<!-- LEAFLET -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+<!-- ICONS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<!-- CHARTS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+:root {
+    --bg:#081321;
+    --panel:#101f31;
+    --panel2:#14263b;
+    --border:#263d55;
+    --text:#e9f2fc;
+    --muted:#8da5bd;
+    --cyan:#20c9e8;
+    --green:#20cf91;
+    --orange:#ffb547;
+    --red:#ff5e67;
+    --purple:#a78bfa;
+}
+
+* {box-sizing:border-box}
+
+body {
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:Arial,Helvetica,sans-serif;
+    overflow:hidden;
+}
+
+header {
+    height:65px;
+    background:#0d1b2b;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 20px;
+}
+
+.brand {
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.logo {
+    width:39px;
+    height:39px;
+    border-radius:10px;
+    background:linear-gradient(135deg,#00b8dc,#1768b2);
+    display:grid;
+    place-items:center;
+    font-size:19px;
+}
+
+.brand h2 {
+    font-size:16px;
+    margin:0;
+    letter-spacing:.7px;
+}
+
+.brand small {
+    color:var(--muted);
+    font-size:10px;
+}
+
+.status {
+    display:flex;
+    align-items:center;
+    gap:7px;
+    font-size:11px;
+    color:var(--green);
+}
+
+.dot {
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:var(--green);
+}
+
+.topright {
+    display:flex;
+    align-items:center;
+    gap:16px;
+    font-size:11px;
+    color:var(--muted);
+}
+
+main {
+    height:calc(100vh - 65px);
+    padding:10px;
+}
+
+.dashboard {
+    height:100%;
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:10px;
+    min-height:0;
+}
+
+.panel {
+    min-width:0;
+    min-height:0;
+    overflow-y:auto;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:9px;
+    padding:12px;
+    scrollbar-width:thin;
+    scrollbar-color:#35516d transparent;
+}
+
+.panel::-webkit-scrollbar {width:5px}
+.panel::-webkit-scrollbar-thumb {
+    background:#35516d;
+    border-radius:5px;
+}
+
+.panel-title {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding-bottom:12px;
+    border-bottom:1px solid var(--border);
+    margin-bottom:12px;
+}
+
+.panel-title h3 {
+    font-size:13px;
+    margin:0;
+    letter-spacing:.6px;
+}
+
+.panel-title span {
+    font-size:10px;
+    color:var(--muted);
+}
+
+.section {
+    background:var(--panel2);
+    border:1px solid var(--border);
+    padding:11px;
+    border-radius:7px;
+    margin-bottom:11px;
+}
+
+.section h4 {
+    margin:0 0 10px;
+    font-size:11px;
+    color:var(--cyan);
+    text-transform:uppercase;
+    letter-spacing:.7px;
+}
+
+label {
+    display:block;
+    font-size:10px;
+    color:var(--muted);
+    margin-bottom:5px;
+}
+
+select,input {
+    width:100%;
+    background:#091728;
+    border:1px solid #344d68;
+    color:var(--text);
+    padding:9px;
+    border-radius:5px;
+    font-size:11px;
+    outline:none;
+}
+
+select:focus,input:focus {
+    border-color:var(--cyan);
+}
+
+.control {
+    margin-bottom:10px;
+}
+
+button {
+    cursor:pointer;
+    border:1px solid #35516d;
+    border-radius:5px;
+    background:#152a40;
+    color:var(--text);
+    padding:9px 11px;
+    font-size:10px;
+}
+
+button:hover,button.active {
+    background:#087e9d;
+    border-color:var(--cyan);
+}
+
+.btnrow {
+    display:flex;
+    gap:5px;
+    flex-wrap:wrap;
+}
+
+.btnrow button {
+    flex:1;
+}
+
+.primary {
+    background:#087e9d;
+    border-color:var(--cyan);
+}
+
+.danger {
+    background:#532a38;
+}
+
+.kpi {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    margin-bottom:11px;
+}
+
+.kpi-card {
+    background:var(--panel2);
+    border:1px solid var(--border);
+    padding:11px;
+    border-radius:7px;
+    min-width:0;
+}
+
+.kpi-card small {
+    display:block;
+    color:var(--muted);
+    font-size:9px;
+    margin-bottom:8px;
+}
+
+.kpi-card strong {
+    font-size:23px;
+    font-weight:700;
+}
+
+.kpi-card .unit {
+    font-size:10px;
+    color:var(--muted);
+}
+
+.aqi-card {
+    border-left:3px solid var(--green);
+}
+
+#map {
+    height:460px;
+    width:100%;
+    border-radius:7px;
+    border:1px solid var(--border);
+    background:#15263a;
+}
+
+.map-controls {
+    display:flex;
+    gap:5px;
+    flex-wrap:wrap;
+    margin-bottom:8px;
+}
+
+.map-controls button {
+    flex:1;
+}
+
+.legend {
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    font-size:9px;
+    color:var(--muted);
+    margin-top:9px;
+}
+
+.legend span {
+    display:flex;
+    align-items:center;
+    gap:5px;
+}
+
+.swatch {
+    width:9px;
+    height:9px;
+    border-radius:50%;
+}
+
+.chart-box {
+    position:relative;
+    height:220px;
+    width:100%;
+}
+
+.chart-box.small {
+    height:190px;
+}
+
+.chart-box canvas {
+    max-width:100%;
+}
+
+.info {
+    color:var(--muted);
+    font-size:10px;
+    line-height:1.7;
+}
+
+.pollutant-grid {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:7px;
+}
+
+.pollutant {
+    background:#0b1b2c;
+    padding:9px;
+    border:1px solid var(--border);
+    border-radius:5px;
+}
+
+.pollutant small {
+    display:block;
+    color:var(--muted);
+    font-size:9px;
+}
+
+.pollutant strong {
+    display:block;
+    font-size:17px;
+    margin-top:6px;
+}
+
+.table-wrap {
+    overflow-x:auto;
+}
+
+table {
+    border-collapse:collapse;
+    width:100%;
+    font-size:10px;
+}
+
+th,td {
+    padding:9px 7px;
+    border-bottom:1px solid var(--border);
+    text-align:left;
+    white-space:nowrap;
+}
+
+th {
+    color:var(--cyan);
+    background:#13263a;
+}
+
+.badge {
+    padding:4px 6px;
+    border-radius:4px;
+    font-size:9px;
+}
+
+.good {background:#124c3b;color:#62e6b3}
+.fair {background:#55502a;color:#f3d56c}
+.moderate {background:#654020;color:#ffc477}
+.poor {background:#642c35;color:#ff8991}
+.verypoor {background:#582c68;color:#e5b1ff}
+
+footer {
+    font-size:9px;
+    color:var(--muted);
+    text-align:center;
+    line-height:1.8;
+    padding:12px 4px;
+    border-top:1px solid var(--border);
+}
+
+#loading {
+    color:var(--orange);
+    font-size:10px;
+}
+
+@media(max-width:950px) {
+    body {overflow:auto}
+    main {height:auto}
+    .dashboard {grid-template-columns:1fr}
+    .panel {min-height:500px;overflow:visible}
+    #map {height:450px}
+    header {height:auto;min-height:65px;flex-wrap:wrap;padding:10px}
+    .topright {display:none}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="brand">
+        <div class="logo"><i class="fa-solid fa-wind"></i></div>
+        <div>
+            <h2>GBoS GEOAI | AIR QUALITY INTELLIGENCE</h2>
+            <small>GAMBIA ATMOSPHERIC MONITORING & FORECAST SYSTEM</small>
+        </div>
+    </div>
+
+    <div class="topright">
+        <div class="status">
+            <span class="dot"></span>
+            API CONNECTION
+        </div>
+        <span id="clock">--:--:--</span>
+        <span id="lastUpdate">Waiting for data</span>
+    </div>
+</header>
+
+<main>
+
+<div class="dashboard">
+
+<!-- =====================================================
+     01. CONTROLS
+===================================================== -->
+
+<section class="panel">
+
+<div class="panel-title">
+    <h3><i class="fa-solid fa-sliders"></i> 01 | DATA & CONTROLS</h3>
+    <span>CONFIGURATION</span>
+</div>
+
+<div class="section">
+    <h4>Geographic selection</h4>
+
+    <div class="control">
+        <label>Monitoring location</label>
+        <select id="location">
+            <option value="13.4549,-16.5790">Brikama</option>
+            <option value="13.4549,-16.5775">Brikama Centre</option>
+            <option value="13.4549,-16.5910">Brikama East</option>
+            <option value="13.4549,-16.6500">Sukuta</option>
+            <option value="13.4070,-16.7080">Serrekunda</option>
+            <option value="13.4380,-16.6770">Kanifing</option>
+            <option value="13.4549,-16.5790">West Coast Region</option>
+            <option value="13.4540,-16.5790">Kombo Central</option>
+            <option value="13.4540,-16.5790">Kombo South</option>
+            <option value="13.4531,-16.5775">Kombo North</option>
+            <option value="13.4540,-16.5790">Kombo East</option>
+            <option value="13.4540,-16.5790">Lower River Region</option>
+            <option value="13.5660,-14.7660">Janjanbureh</option>
+            <option value="13.5230,-14.7640">Central River Region</option>
+            <option value="13.4660,-16.1000">North Bank Region</option>
+            <option value="13.4880,-16.5450">Kerewan</option>
+            <option value="13.3010,-16.2650">Mansakonko</option>
+            <option value="13.2780,-16.6490">Banjul</option>
+            <option value="13.4330,-16.6500">Greater Banjul Area</option>
+            <option value="13.3100,-14.2230">Basse Santa Su</option>
+            <option value="13.3500,-14.2000">Upper River Region</option>
+            <option value="13.3000,-15.9000">Kuntaur</option>
+            <option value="13.2000,-16.0000">Full Gambia Reference</option>
+        </select>
+    </div>
+
+    <div class="control">
+        <label>Latitude (WGS84)</label>
+        <input type="number" id="latitude" step="0.0001" value="13.4549">
+    </div>
+
+    <div class="control">
+        <label>Longitude (WGS84)</label>
+        <input type="number" id="longitude" step="0.0001" value="-16.5790">
+    </div>
+
+    <div class="btnrow">
+        <button class="primary" onclick="loadData()">
+            <i class="fa-solid fa-play"></i> RUN ANALYSIS
+        </button>
+        <button onclick="useMapLocation()">
+            <i class="fa-solid fa-location-crosshairs"></i> MAP LOCATION
+        </button>
+    </div>
+</div>
+
+<div class="section">
+    <h4>Temporal analysis</h4>
+
+    <div class="control">
+        <label>Analysis period</label>
+        <div class="btnrow">
+            <button id="dailyBtn" class="active" onclick="setPeriod('daily')">Daily</button>
+            <button id="weeklyBtn" onclick="setPeriod('weekly')">Weekly</button>
+            <button id="forecastBtn" onclick="setPeriod('forecast')">Forecast</button>
+        </div>
+    </div>
+
+    <div class="control">
+        <label>Data history</label>
+        <select id="history">
+            <option value="7">Last 7 days</option>
+            <option value="14">Last 14 days</option>
+            <option value="30">Last 30 days</option>
+        </select>
+    </div>
+
+    <div class="control">
+        <label>Forecast horizon</label>
+        <select id="forecastDays">
+            <option value="3">3 days</option>
+            <option value="5">5 days</option>
+            <option value="7" selected>7 days</option>
+        </select>
+    </div>
+</div>
+
+<div class="section">
+    <h4>Pollutant parameters</h4>
+
+    <div class="control">
+        <label>Primary analysis variable</label>
+        <select id="pollutant" onchange="updateCharts()">
+            <option value="pm2_5">PM2.5</option>
+            <option value="pm10">PM10</option>
+            <option value="nitrogen_dioxide">Nitrogen Dioxide (NO₂)</option>
+            <option value="sulphur_dioxide">Sulphur Dioxide (SO₂)</option>
+            <option value="ozone">Ozone (O₃)</option>
+            <option value="carbon_monoxide">Carbon Monoxide (CO)</option>
+            <option value="dust">Dust</option>
+            <option value="european_aqi">European AQI</option>
+            <option value="us_aqi">US AQI</option>
+        </select>
+    </div>
+
+    <div class="control">
+        <label>Map visualisation</label>
+        <select id="mapVariable" onchange="updateMap()">
+            <option value="european_aqi">European AQI</option>
+            <option value="us_aqi">US AQI</option>
+            <option value="pm2_5">PM2.5</option>
+            <option value="pm10">PM10</option>
+            <option value="nitrogen_dioxide">NO₂</option>
+            <option value="ozone">O₃</option>
+        </select>
+    </div>
+
+    <div class="control">
+        <label>Basemap</label>
+        <select id="basemap" onchange="changeBasemap()">
+            <option value="street">Street</option>
+            <option value="satellite">Satellite</option>
+            <option value="terrain">Terrain</option>
+            <option value="dark">Dark</option>
+        </select>
+    </div>
+</div>
+
+<div class="section">
+    <h4>Data operations</h4>
+    <div class="btnrow">
+        <button class="primary" onclick="loadData()">
+            <i class="fa-solid fa-rotate"></i> REFRESH
+        </button>
+        <button onclick="exportCSV()">
+            <i class="fa-solid fa-file-csv"></i> CSV
+        </button>
+        <button onclick="resetDashboard()">
+            <i class="fa-solid fa-rotate-left"></i> RESET
+        </button>
+    </div>
+    <p class="info" id="apiStatus">Connecting to public API...</p>
+</div>
+
+<div class="section">
+    <h4>Data sources</h4>
+    <p class="info">
+        Open-Meteo Air Quality API<br>
+        Copernicus Atmosphere Monitoring Service (CAMS)<br>
+        OpenStreetMap<br>
+        Leaflet mapping framework<br>
+        Chart.js visualisation framework
+    </p>
+</div>
+
+<div class="section">
+    <h4>Methodology</h4>
+    <p class="info">
+        Air quality data are obtained from atmospheric composition
+        models. Hourly values are used to calculate daily averages,
+        weekly statistics and forecast summaries. AQI values are
+        retained from the source API. Missing values are excluded
+        from statistical calculations.
+    </p>
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     02. MAP
+===================================================== -->
+
+<section class="panel">
+
+<div class="panel-title">
+    <h3><i class="fa-solid fa-map-location-dot"></i> 02 | INTERACTIVE MAP</h3>
+    <span>WGS84 / EPSG:4326</span>
+</div>
+
+<div class="section">
+    <h4>Spatial air quality monitoring</h4>
+
+    <div class="map-controls">
+        <button class="active" onclick="map.setZoom(8)">GAMBIA</button>
+        <button onclick="map.setZoom(11)">REGIONAL</button>
+        <button onclick="map.setZoom(14)">LOCAL</button>
+        <button onclick="map.locate({setView:true,maxZoom:13})">MY LOCATION</button>
+    </div>
+
+    <div id="map"></div>
+
+    <div class="legend">
+        <span><i class="swatch" style="background:#20cf91"></i>Good</span>
+        <span><i class="swatch" style="background:#f3d56c"></i>Fair</span>
+        <span><i class="swatch" style="background:#ffb547"></i>Moderate</span>
+        <span><i class="swatch" style="background:#ff5e67"></i>Poor</span>
+        <span><i class="swatch" style="background:#a78bfa"></i>Very poor</span>
+    </div>
+</div>
+
+<div class="section">
+    <h4>Selected location information</h4>
+    <div class="pollutant-grid">
+        <div class="pollutant">
+            <small>LATITUDE</small>
+            <strong id="mapLat">13.4549</strong>
+        </div>
+        <div class="pollutant">
+            <small>LONGITUDE</small>
+            <strong id="mapLon">-16.5790</strong>
+        </div>
+        <div class="pollutant">
+            <small>MODEL ELEVATION</small>
+            <strong id="elevation">--</strong>
+        </div>
+        <div class="pollutant">
+            <small>TIME ZONE</small>
+            <strong style="font-size:13px">Africa/Banjul</strong>
+        </div>
+    </div>
+</div>
+
+<div class="section">
+    <h4>Air quality interpretation</h4>
+    <div class="pollutant-grid">
+        <div class="pollutant">
+            <small>SELECTED AQI</small>
+            <strong id="mapAQI">--</strong>
+        </div>
+        <div class="pollutant">
+            <small>CONDITION</small>
+            <strong id="mapCondition" style="font-size:13px">Loading</strong>
+        </div>
+    </div>
+    <p class="info" id="mapDescription">
+        Select a location to inspect its air quality.
+    </p>
+</div>
+
+<div class="section">
+    <h4>Map interpretation</h4>
+    <p class="info">
+        The map marker represents the selected model grid-cell
+        location. It does not represent a physical monitoring
+        station. The grid-cell coordinates returned by the API
+        may differ slightly from the requested coordinates.
+    </p>
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     03. ANALYTICS
+===================================================== -->
+
+<section class="panel">
+
+<div class="panel-title">
+    <h3><i class="fa-solid fa-chart-line"></i> 03 | ANALYTICS & STATISTICS</h3>
+    <span id="analysisPeriod">DAILY</span>
+</div>
+
+<div class="kpi">
+
+    <div class="kpi-card aqi-card">
+        <small>EUROPEAN AQI</small>
+        <strong id="aqiValue">--</strong>
+        <div class="unit" id="aqiStatus">Waiting for data</div>
+    </div>
+
+    <div class="kpi-card">
+        <small>PM2.5 CONCENTRATION</small>
+        <strong id="pm25Value">--</strong>
+        <div class="unit">µg/m³</div>
+    </div>
+
+    <div class="kpi-card">
+        <small>PM10 CONCENTRATION</small>
+        <strong id="pm10Value">--</strong>
+        <div class="unit">µg/m³</div>
+    </div>
+
+    <div class="kpi-card">
+        <small>OZONE CONCENTRATION</small>
+        <strong id="o3Value">--</strong>
+        <div class="unit">µg/m³</div>
+    </div>
+
+    <div class="kpi-card">
+        <small>NO₂ CONCENTRATION</small>
+        <strong id="no2Value">--</strong>
+        <div class="unit">µg/m³</div>
+    </div>
+
+    <div class="kpi-card">
+        <small>US AQI</small>
+        <strong id="usAqiValue">--</strong>
+        <div class="unit">AQI index</div>
+    </div>
+
+</div>
+
+<div class="section">
+    <h4 id="mainChartTitle">Air Quality Trend</h4>
+    <div class="chart-box">
+        <canvas id="mainChart"></canvas>
+    </div>
+</div>
+
+<div class="section">
+    <h4>Pollutant distribution</h4>
+    <div class="chart-box small">
+        <canvas id="pollutantChart"></canvas>
+    </div>
+</div>
+
+<div class="section">
+    <h4>Hourly air quality profile</h4>
+    <div class="chart-box small">
+        <canvas id="hourlyChart"></canvas>
+    </div>
+</div>
+
+<div class="section">
+    <h4>Statistical summary</h4>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Statistic</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody id="statsTable">
+                <tr><td>Status</td><td>Loading...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="section">
+    <h4>Daily / weekly data records</h4>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>PM2.5</th>
+                    <th>PM10</th>
+                    <th>AQI</th>
+                </tr>
+            </thead>
+            <tbody id="dataTable">
+                <tr><td colspan="4">Waiting for API...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="section">
+    <h4>Data quality & limitations</h4>
+    <p class="info" id="qualityInfo">
+        Data validation will be displayed after loading.
+    </p>
+</div>
+
+<footer>
+    Produced by Ansu Singhateh<br>
+    GIS Analyst | GIS / Cartography Unit | Gambia Bureau of Statistics<br>
+    GBoS GEOAI • Research and educational use<br>
+    Atmospheric data: CAMS / Open-Meteo • Basemap: OpenStreetMap
+</footer>
+
+</section>
+
+</div>
+</main>
+
+
+<script>
+
+/* =========================================================
+   1. CONFIGURATION
+========================================================= */
+
+const API =
+"https://air-quality-api.open-meteo.com/v1/air-quality";
+
+const VARIABLES = [
+    "pm2_5",
+    "pm10",
+    "carbon_monoxide",
+    "nitrogen_dioxide",
+    "sulphur_dioxide",
+    "ozone",
+    "dust",
+    "aerosol_optical_depth",
+    "uv_index",
+    "european_aqi",
+    "us_aqi"
+];
+
+const NAMES = {
+    pm2_5:"PM2.5",
+    pm10:"PM10",
+    carbon_monoxide:"Carbon Monoxide",
+    nitrogen_dioxide:"Nitrogen Dioxide",
+    sulphur_dioxide:"Sulphur Dioxide",
+    ozone:"Ozone",
+    dust:"Dust",
+    aerosol_optical_depth:"Aerosol Optical Depth",
+    uv_index:"UV Index",
+    european_aqi:"European AQI",
+    us_aqi:"US AQI"
+};
+
+const UNITS = {
+    pm2_5:"µg/m³",
+    pm10:"µg/m³",
+    carbon_monoxide:"µg/m³",
+    nitrogen_dioxide:"µg/m³",
+    sulphur_dioxide:"µg/m³",
+    ozone:"µg/m³",
+    dust:"µg/m³",
+    aerosol_optical_depth:"",
+    uv_index:"",
+    european_aqi:"",
+    us_aqi:""
+};
+
+let airData = null;
+let period = "daily";
+let mainChart = null;
+let pollutantChart = null;
+let hourlyChart = null;
+let marker = null;
+let circle = null;
+let currentLayer = null;
+let dailyData = [];
+let requestController = null;
+
+
+/* =========================================================
+   2. MAP INITIALISATION
+========================================================= */
+
+const map = L.map("map", {
+    zoomControl:true
+}).setView([13.45,-16.58],8);
+
+const basemaps = {
+
+    street:L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {maxZoom:19,attribution:"© OpenStreetMap"}
+    ),
+
+    satellite:L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        {maxZoom:19,attribution:"Esri World Imagery"}
+    ),
+
+    terrain:L.tileLayer(
+        "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
+        {maxZoom:17,attribution:"© OpenTopoMap"}
+    ),
+
+    dark:L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+        {maxZoom:19,attribution:"© CARTO"}
+    )
+};
+
+basemaps.street.addTo(map);
+currentLayer = basemaps.street;
+
+map.on("click",function(e){
+
+    document.getElementById("latitude").value =
+        e.latlng.lat.toFixed(5);
+
+    document.getElementById("longitude").value =
+        e.latlng.lng.toFixed(5);
+
+    loadData();
+
+});
+
+
+function changeBasemap(){
+
+    const name = document.getElementById("basemap").value;
+
+    map.removeLayer(currentLayer);
+
+    currentLayer = basemaps[name];
+
+    currentLayer.addTo(map);
+
+}
+
+
+function useMapLocation(){
+
+    const lat = Number(document.getElementById("latitude").value);
+    const lon = Number(document.getElementById("longitude").value);
+
+    if(!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+
+    map.setView([lat,lon],12);
+
+    loadData();
+}
+
+
+/* =========================================================
+   3. LOCATION SELECTOR
+========================================================= */
+
+document.getElementById("location").addEventListener("change",function(){
+
+    const coords = this.value.split(",");
+
+    document.getElementById("latitude").value = coords[0];
+    document.getElementById("longitude").value = coords[1];
+
+    loadData();
+
+});
+
+
+/* =========================================================
+   4. API DATA FETCHING
+========================================================= */
+
+async function loadData(){
+
+    const lat = Number(document.getElementById("latitude").value);
+    const lon = Number(document.getElementById("longitude").value);
+
+    if(!Number.isFinite(lat) || !Number.isFinite(lon) ||
+       lat < -90 || lat > 90 || lon < -180 || lon > 180){
+
+        alert("Please provide valid WGS84 coordinates.");
+        return;
+    }
+
+    if(requestController) requestController.abort();
+
+    requestController = new AbortController();
+
+    document.getElementById("apiStatus").textContent =
+        "Fetching atmospheric data...";
+
+    document.getElementById("qualityInfo").textContent =
+        "API request in progress.";
+
+    const params = new URLSearchParams({
+
+        latitude:lat,
+        longitude:lon,
+
+        hourly:VARIABLES.join(","),
+
+        current:[
+            "european_aqi",
+            "us_aqi",
+            "pm2_5",
+            "pm10",
+            "carbon_monoxide",
+            "nitrogen_dioxide",
+            "sulphur_dioxide",
+            "ozone",
+            "dust",
+            "uv_index"
+        ].join(","),
+
+        past_days:document.getElementById("history").value,
+
+        forecast_days:document.getElementById("forecastDays").value,
+
+        timezone:"Africa/Banjul",
+
+        domains:"cams_global"
+
+    });
+
+    try{
+
+        const response = await fetch(API+"?"+params.toString(),{
+            signal:requestController.signal
+        });
+
+        if(!response.ok){
+
+            throw new Error("API HTTP error: "+response.status);
+
+        }
+
+        const json = await response.json();
+
+        if(json.error){
+
+            throw new Error(json.reason || "API returned an error.");
+
+        }
+
+        if(!json.hourly || !json.hourly.time){
+
+            throw new Error("No hourly data returned.");
+
+        }
+
+        airData = json;
+
+        dailyData = calculateDaily(json);
+
+        updateDashboard();
+
+        document.getElementById("apiStatus").textContent =
+            "Connected successfully • CAMS Global";
+
+        document.getElementById("lastUpdate").textContent =
+            "Updated: "+new Date().toLocaleTimeString();
+
+        document.getElementById("elevation").textContent =
+            json.elevation !== undefined ?
+            json.elevation.toFixed(1)+" m" : "--";
+
+        document.getElementById("mapLat").textContent =
+            json.latitude.toFixed(4);
+
+        document.getElementById("mapLon").textContent =
+            json.longitude.toFixed(4);
+
+    }
+    catch(error){
+
+        if(error.name==="AbortError") return;
+
+        console.error(error);
+
+        document.getElementById("apiStatus").textContent =
+            "API error: "+error.message;
+
+        document.getElementById("qualityInfo").textContent =
+            "The API request failed. Check your internet connection and try again.";
+
+    }
+
+}
+
+
+/* =========================================================
+   5. DAILY AGGREGATION
+========================================================= */
+
+function calculateDaily(json){
+
+    const h = json.hourly;
+    const dates = {};
+
+    h.time.forEach((time,i)=>{
+
+        const date = time.substring(0,10);
+
+        if(!dates[date]){
+
+            dates[date] = {};
+
+            VARIABLES.forEach(v=>dates[date][v]=[]);
+
+        }
+
+        VARIABLES.forEach(v=>{
+
+            const value = h[v] ? h[v][i] : null;
+
+            if(value !== null && value !== undefined &&
+               Number.isFinite(Number(value))){
+
+                dates[date][v].push(Number(value));
+
+            }
+
+        });
+
+    });
+
+    return Object.keys(dates).sort().map(date=>{
+
+        const row = {date};
+
+        VARIABLES.forEach(v=>{
+
+            const values = dates[date][v];
+
+            row[v] = average(values);
+
+        });
+
+        return row;
+
+    });
+
+}
+
+
+function average(values){
+
+    const valid = values.filter(v=>v!==null && Number.isFinite(v));
+
+    if(!valid.length) return null;
+
+    return valid.reduce((a,b)=>a+b,0)/valid.length;
+
+}
+
+
+function getStats(values){
+
+    const a = values
+        .filter(v=>v!==null && Number.isFinite(v))
+        .sort((x,y)=>x-y);
+
+    if(!a.length) return null;
+
+    const sum = a.reduce((x,y)=>x+y,0);
+
+    const percentile = p=>{
+
+        const index = (a.length-1)*p;
+        const lower = Math.floor(index);
+        const upper = Math.ceil(index);
+
+        if(lower===upper) return a[lower];
+
+        return a[lower]+(a[upper]-a[lower])*(index-lower);
+
+    };
+
+    return {
+
+        count:a.length,
+        mean:sum/a.length,
+        min:a[0],
+        max:a[a.length-1],
+        median:percentile(.5),
+        p90:percentile(.9)
+
+    };
+
+}
+
+
+function fmt(v){
+
+    return v===null || v===undefined ||
+        !Number.isFinite(Number(v)) ? "--" :
+        Number(v).toFixed(1);
+
+}
+
+
+/* =========================================================
+   6. AIR QUALITY CLASSIFICATION
+========================================================= */
+
+function getAQIClass(value){
+
+    if(value===null || value===undefined) return "Unknown";
+
+    if(value<=20) return "Good";
+    if(value<=40) return "Fair";
+    if(value<=60) return "Moderate";
+    if(value<=80) return "Poor";
+    if(value<=100) return "Very poor";
+
+    return "Extremely poor";
+
+}
+
+
+function getColor(value){
+
+    if(value===null || !Number.isFinite(Number(value))) return "#8da5bd";
+
+    if(value<=20) return "#20cf91";
+    if(value<=40) return "#f3d56c";
+    if(value<=60) return "#ffb547";
+    if(value<=80) return "#ff5e67";
+    if(value<=100) return "#a78bfa";
+
+    return "#b45cff";
+
+}
+
+
+function getAQIStyle(value){
+
+    if(value<=20) return "good";
+    if(value<=40) return "fair";
+    if(value<=60) return "moderate";
+    if(value<=80) return "poor";
+
+    return "verypoor";
+
+}
+
+
+/* =========================================================
+   7. UPDATE DASHBOARD
+========================================================= */
+
+function updateDashboard(){
+
+    if(!airData) return;
+
+    updateKPIs();
+
+    updateMap();
+
+    updateCharts();
+
+    updateTables();
+
+    updateStats();
+
+    updateHourly();
+
+    updateQuality();
+
+}
+
+
+/* =========================================================
+   8. KPI VALUES
+========================================================= */
+
+function updateKPIs(){
+
+    const c = airData.current || {};
+
+    const h = airData.hourly;
+
+    const latestIndex = h.time.length-1;
+
+    const currentValue = (key)=>{
+
+        if(c[key]!==undefined && c[key]!==null) return c[key];
+
+        return h[key] ? h[key][latestIndex] : null;
+
+    };
+
+    const aqi = currentValue("european_aqi");
+
+    document.getElementById("aqiValue").textContent = fmt(aqi);
+
+    document.getElementById("aqiStatus").textContent =
+        getAQIClass(aqi);
+
+    document.getElementById("pm25Value").textContent =
+        fmt(currentValue("pm2_5"));
+
+    document.getElementById("pm10Value").textContent =
+        fmt(currentValue("pm10"));
+
+    document.getElementById("o3Value").textContent =
+        fmt(currentValue("ozone"));
+
+    document.getElementById("no2Value").textContent =
+        fmt(currentValue("nitrogen_dioxide"));
+
+    document.getElementById("usAqiValue").textContent =
+        fmt(currentValue("us_aqi"));
+
+}
+
+
+/* =========================================================
+   9. PERIOD SWITCHING
+========================================================= */
+
+function setPeriod(value){
+
+    period = value;
+
+    ["daily","weekly","forecast"].forEach(p=>{
+
+        document.getElementById(p+"Btn").classList.toggle(
+            "active",p===value
+        );
+
+    });
+
+    document.getElementById("analysisPeriod").textContent =
+        value.toUpperCase();
+
+    updateCharts();
+
+    updateTables();
+
+    updateStats();
+
+}
+
+
+function getPeriodData(){
+
+    const now = new Date();
+
+    const today = now.toLocaleDateString("en-CA",{
+        timeZone:"Africa/Banjul"
+    });
+
+    if(period==="daily"){
+
+        const row = dailyData.find(d=>d.date===today);
+
+        if(!row) return [];
+
+        return [row];
+
+    }
+
+    if(period==="weekly"){
+
+        return dailyData.slice(-7);
+
+    }
+
+    return dailyData.filter(d=>d.date>=today)
+        .slice(0,Number(document.getElementById("forecastDays").value));
+
+}
+
+
+/* =========================================================
+   10. CHART CONFIGURATION
+========================================================= */
+
+function chartOptions(){
+
+    return {
+
+        responsive:true,
+
+        maintainAspectRatio:false,
+
+        interaction:{
+            intersect:false,
+            mode:"index"
+        },
+
+        plugins:{
+
+            legend:{
+                labels:{
+                    color:"#bdcfe1",
+                    font:{size:10}
+                }
+            },
+
+            tooltip:{
+                backgroundColor:"#0b1b2c",
+                titleColor:"#20c9e8",
+                bodyColor:"#ffffff"
+            }
+
+        },
+
+        scales:{
+
+            x:{
+                ticks:{
+                    color:"#8da5bd",
+                    font:{size:9},
+                    maxRotation:45
+                },
+                grid:{color:"#263d55"}
+            },
+
+            y:{
+                beginAtZero:true,
+                ticks:{
+                    color:"#8da5bd",
+                    font:{size:9}
+                },
+                grid:{color:"#263d55"}
+            }
+
+        }
+
+    };
+
+}
+
+
+function createChart(id,config){
+
+    if(id==="mainChart" && mainChart) mainChart.destroy();
+
+    if(id==="pollutantChart" && pollutantChart) pollutantChart.destroy();
+
+    if(id==="hourlyChart" && hourlyChart) hourlyChart.destroy();
+
+    const chart = new Chart(
+        document.getElementById(id),
+        config
+    );
+
+    if(id==="mainChart") mainChart=chart;
+    if(id==="pollutantChart") pollutantChart=chart;
+    if(id==="hourlyChart") hourlyChart=chart;
+
+    return chart;
+
+}
+
+
+/* =========================================================
+   11. MAIN TREND CHART
+========================================================= */
+
+function updateCharts(){
+
+    if(!airData) return;
+
+    const key = document.getElementById("pollutant").value;
+
+    const rows = getPeriodData();
+
+    const labels = rows.map(r=>r.date);
+
+    const values = rows.map(r=>r[key]);
+
+    document.getElementById("mainChartTitle").textContent =
+        NAMES[key]+" • "+period.toUpperCase();
+
+    createChart("mainChart",{
+
+        type:"line",
+
+        data:{
+
+            labels,
+
+            datasets:[{
+
+                label:NAMES[key]+" "+(UNITS[key] || ""),
+
+                data:values,
+
+                borderColor:"#20c9e8",
+
+                backgroundColor:"rgba(32,201,232,.15)",
+
+                fill:true,
+
+                tension:.3,
+
+                spanGaps:true,
+
+                pointRadius:4
+
+            }]
+
+        },
+
+        options:chartOptions()
+
+    });
+
+
+    /* POLLUTANT DISTRIBUTION */
+
+    const keys = [
+        "pm2_5",
+        "pm10",
+        "nitrogen_dioxide",
+        "sulphur_dioxide",
+        "ozone",
+        "carbon_monoxide"
+    ];
+
+    const averages = keys.map(k=>{
+
+        return average(rows.map(r=>r[k]));
+
+    });
+
+    createChart("pollutantChart",{
+
+        type:"bar",
+
+        data:{
+
+            labels:keys.map(k=>NAMES[k]),
+
+            datasets:[{
+
+                label:"Average concentration (µg/m³)",
+
+                data:averages,
+
+                backgroundColor:[
+                    "#20c9e8",
+                    "#20cf91",
+                    "#ffb547",
+                    "#a78bfa",
+                    "#ff5e67",
+                    "#638ee8"
+                ]
+
+            }]
+
+        },
+
+        options:chartOptions()
+
+    });
+
+}
+
+
+/* =========================================================
+   12. HOURLY CHART
+========================================================= */
+
+function updateHourly(){
+
+    if(!airData) return;
+
+    const key = document.getElementById("pollutant").value;
+
+    const h = airData.hourly;
+
+    const today = new Date().toLocaleDateString("en-CA",{
+        timeZone:"Africa/Banjul"
+    });
+
+    let indices = h.time.map((t,i)=>t.substring(0,10)===today?i:-1)
+        .filter(i=>i>=0);
+
+    if(indices.length===0){
+
+        indices=h.time.map((t,i)=>i).slice(-24);
+
+    }
+
+    const labels=indices.map(i=>h.time[i].substring(11,16));
+
+    const values=indices.map(i=>h[key] ? h[key][i] : null);
+
+    createChart("hourlyChart",{
+
+        type:"line",
+
+        data:{
+
+            labels,
+
+            datasets:[{
+
+                label:NAMES[key],
+
+                data:values,
+
+                borderColor:"#a78bfa",
+
+                backgroundColor:"rgba(167,139,250,.12)",
+
+                fill:true,
+
+                tension:.3,
+
+                spanGaps:true,
+
+                pointRadius:2
+
+            }]
+
+        },
+
+        options:chartOptions()
+
+    });
+
+}
+
+
+/* =========================================================
+   13. MAP UPDATE
+========================================================= */
+
+function updateMap(){
+
+    if(!airData) return;
+
+    const c=airData.current || {};
+
+    const key=document.getElementById("mapVariable").value;
+
+    const value=c[key];
+
+    const lat=airData.latitude;
+    const lon=airData.longitude;
+
+    const color=getColor(value);
+
+    if(marker) map.removeLayer(marker);
+
+    if(circle) map.removeLayer(circle);
+
+    marker=L.circleMarker([lat,lon],{
+
+        radius:11,
+
+        color:"#ffffff",
+
+        weight:2,
+
+        fillColor:color,
+
+        fillOpacity:.95
+
+    }).addTo(map);
+
+    marker.bindPopup(`
+
+        <b>GBoS GEOAI AIR QUALITY</b><br>
+
+        Latitude: ${lat.toFixed(4)}<br>
+
+        Longitude: ${lon.toFixed(4)}<br>
+
+        ${NAMES[key]}: ${fmt(value)} ${UNITS[key] || ""}<br>
+
+        ${key==="european_aqi" ? getAQIClass(value) : "Modelled concentration"}
+
+    `);
+
+    circle=L.circle([lat,lon],{
+
+        radius:12000,
+
+        color:color,
+
+        fillColor:color,
+
+        fillOpacity:.08,
+
+        weight:1
+
+    }).addTo(map);
+
+    map.setView([lat,lon],9);
+
+    document.getElementById("mapAQI").textContent=fmt(c.european_aqi);
+
+    document.getElementById("mapCondition").textContent=
+        getAQIClass(c.european_aqi);
+
+    document.getElementById("mapDescription").textContent=
+        "Selected variable: "+NAMES[key]+
+        ". Model grid-cell value: "+fmt(value)+" "+
+        (UNITS[key] || "")+". The displayed circle is a visual locator, not a measured pollution footprint.";
+
+}
+
+
+/* =========================================================
+   14. STATISTICAL SUMMARY
+========================================================= */
+
+function updateStats(){
+
+    if(!airData) return;
+
+    const key=document.getElementById("pollutant").value;
+
+    const rows=getPeriodData();
+
+    const values=rows.map(r=>r[key]);
+
+    const s=getStats(values);
+
+    let html="";
+
+    if(s){
+
+        html+=`
+
+        <tr><td>Observations</td><td>${s.count}</td></tr>
+
+        <tr><td>Mean</td><td>${fmt(s.mean)}</td></tr>
+
+        <tr><td>Minimum</td><td>${fmt(s.min)}</td></tr>
+
+        <tr><td>Maximum</td><td>${fmt(s.max)}</td></tr>
+
+        <tr><td>Median</td><td>${fmt(s.median)}</td></tr>
+
+        <tr><td>90th percentile</td><td>${fmt(s.p90)}</td></tr>
+
+        <tr><td>Standard deviation</td><td>${fmt(
+            Math.sqrt(average(values.filter(v=>v!==null).map(v=>
+                Math.pow(v-s.mean,2)
+            )))
+        )}</td></tr>
+
+        `;
+
+    }else{
+
+        html="<tr><td colspan='2'>No valid observations for this period.</td></tr>";
+
+    }
+
+    document.getElementById("statsTable").innerHTML=html;
+
+}
+
+
+/* =========================================================
+   15. DATA TABLE
+========================================================= */
+
+function updateTables(){
+
+    if(!airData) return;
+
+    const rows=getPeriodData();
+
+    let html="";
+
+    rows.forEach(r=>{
+
+        html+=`
+
+        <tr>
+
+            <td>${r.date}</td>
+
+            <td>${fmt(r.pm2_5)}</td>
+
+            <td>${fmt(r.pm10)}</td>
+
+            <td>${fmt(r.european_aqi)}</td>
+
+        </tr>
+
+        `;
+
+    });
+
+    if(!html){
+
+        html="<tr><td colspan='4'>No records for the selected period.</td></tr>";
+
+    }
+
+    document.getElementById("dataTable").innerHTML=html;
+
+}
+
+
+/* =========================================================
+   16. DATA QUALITY
+========================================================= */
+
+function updateQuality(){
+
+    const h=airData.hourly;
+
+    const total=h.time.length;
+
+    const valid=h.pm2_5.filter(v=>v!==null && Number.isFinite(v)).length;
+
+    const completeness=total ? valid/total*100 : 0;
+
+    document.getElementById("qualityInfo").textContent=
+
+        "Source: CAMS Global atmospheric composition forecast. "+
+        "Returned grid cell: "+airData.latitude.toFixed(4)+
+        ", "+airData.longitude.toFixed(4)+". "+
+        "Time zone: "+airData.timezone+". "+
+        "PM2.5 data completeness: "+completeness.toFixed(1)+
+        "%. Total time steps: "+total+
+        ". Missing observations are excluded from summary statistics. "+
+        "Forecast values are model estimates, not direct ground measurements.";
+
+}
+
+
+/* =========================================================
+   17. CSV EXPORT
+========================================================= */
+
+function exportCSV(){
+
+    if(!airData){
+
+        alert("Load the API data first.");
+        return;
+
+    }
+
+    const h=airData.hourly;
+
+    const headers=[
+        "datetime",
+        ...VARIABLES
+    ];
+
+    const rows=[headers.join(",")];
+
+    h.time.forEach((time,i)=>{
+
+        const values=[time];
+
+        VARIABLES.forEach(k=>{
+
+            const value=h[k] ? h[k][i] : null;
+
+            values.push(
+                value===null || value===undefined ? "" : value
+            );
+
+        });
+
+        rows.push(values.join(","));
+
+    });
+
+    const blob=new Blob(
+        [rows.join("\n")],
+        {type:"text/csv;charset=utf-8;"}
+    );
+
+    const url=URL.createObjectURL(blob);
+
+    const a=document.createElement("a");
+
+    a.href=url;
+
+    a.download="Gambia_Air_Quality_Hourly_Data.csv";
+
+    a.click();
+
+    URL.revokeObjectURL(url);
+
+}
+
+
+/* =========================================================
+   18. RESET
+========================================================= */
+
+function resetDashboard(){
+
+    document.getElementById("location").selectedIndex=0;
+
+    document.getElementById("latitude").value=13.4549;
+
+    document.getElementById("longitude").value=-16.5790;
+
+    document.getElementById("pollutant").value="pm2_5";
+
+    document.getElementById("mapVariable").value="european_aqi";
+
+    document.getElementById("history").value="7";
+
+    document.getElementById("forecastDays").value="7";
+
+    document.getElementById("basemap").value="street";
+
+    changeBasemap();
+
+    setPeriod("daily");
+
+    map.setView([13.45,-16.58],8);
+
+    loadData();
+
+}
+
+
+/* =========================================================
+   19. CLOCK
+========================================================= */
+
+function updateClock(){
+
+    document.getElementById("clock").textContent=
+
+        new Date().toLocaleString("en-GB",{
+
+            timeZone:"Africa/Banjul",
+
+            dateStyle:"medium",
+
+            timeStyle:"medium"
+
+        });
+
+}
+
+setInterval(updateClock,1000);
+
+updateClock();
+
+
+/* =========================================================
+   20. INITIALISE
+========================================================= */
+
+loadData();
+
+</script>
+
+</body>
+</html>
+```
+
+---
+
+### Dashboard capabilities
+
+| Module | Function |
+|---|---|
+| Daily | Daily air-quality summary and hourly profile |
+| Weekly | Seven-day trend and statistical summary |
+| Forecast | Three-, five- or seven-day forecast |
+| Spatial | Click map to select a new coordinate |
+| Satellite | Esri satellite imagery |
+| Pollutants | PM2.5, PM10, NO₂, SO₂, CO, O₃ and dust |
+| AQI | European and US air-quality indices |
+| Analytics | Mean, minimum, maximum, median, P90 and standard deviation |
+| Export | Download hourly API data as CSV |
+
+**Important technical notes**
+
+- The Open-Meteo API supports up to 92 past days and seven forecast days, but the dashboard's default history selector is seven days. <Cite refs={["turn717050search0","turn717050search1"]}/>
+- The global CAMS model has approximately 45 km spatial resolution and three-hourly temporal resolution. It cannot provide reliable street-level pollution measurements.
+- Daily and weekly values are calculated from available hourly model outputs.
+- The map's circle is a location indicator, not an interpolated pollution surface.
+- The API is accessed directly from the browser; an internet connection is required.
+- The dashboard does not claim to provide validated national ground-monitoring observations.
+
+**Deployment:** You can host this HTML directly on GitHub Pages without a separate backend.
